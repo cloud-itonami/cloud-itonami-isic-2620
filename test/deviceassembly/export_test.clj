@@ -53,5 +53,5 @@
         pkg (export/audit-package db)
         bundle (export/package->csv-bundle db)]
     (is (= 0 (get-in pkg [:counts :shipments])))
-    (is (= 5 (get-in pkg [:counts :device-units])))
+    (is (= 6 (get-in pkg [:counts :device-units])))
     (is (str/includes? (get bundle "ledger.csv") "seq,t,op"))))

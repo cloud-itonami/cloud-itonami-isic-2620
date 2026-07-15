@@ -186,6 +186,15 @@
       (is (some #{:robotics-simulation-out-of-tolerance} (-> (store/ledger db) last :basis)))
       (is (empty? (store/shipment-history db))))))
 
+(deftest connector-mating-force-out-of-tolerance-is-held
+  (testing "device-unit-6 has a robotics-sim already on file and a CLEAN thermal-margin reading, but its own REAL physics-2d-simulated connector mating/insertion-force telemetry (driven by a deliberately too-heavy :connector-plug-mass-kg) exceeds the disclosed ceiling on INDEPENDENT recheck -> HOLD, never trusts the on-file verdict alone -- ADR-2607991500's ADDITIONAL check, distinct from device-unit-5's pre-existing thermal-margin scenario"
+    (let [[db actor] (fresh)
+          _ (verify! actor "t14pre" "device-unit-6")
+          res (exec-op actor "t14" {:op :actuation/ship-device-unit :subject "device-unit-6"} operator)]
+      (is (= :hold (get-in res [:state :disposition])))
+      (is (some #{:connector-mating-force-out-of-tolerance} (-> (store/ledger db) last :basis)))
+      (is (empty? (store/shipment-history db))))))
+
 (deftest every-decision-leaves-one-ledger-fact
   (testing "write-only-through-ledger: N operations -> N ledger facts"
     (let [[db actor] (fresh)]

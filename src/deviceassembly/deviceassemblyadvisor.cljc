@@ -113,25 +113,31 @@
   "Runs the robot burn-in-cell verification mission
   (`deviceassembly.robotics`) and drafts its result as a proposal. High
   confidence -- the mission itself is deterministic simulated telemetry
-  derived from the device-unit's own recorded thermal-margin fields,
-  not an LLM guess; the Assembly Governor still independently re-
-  derives :passed? from those same fields before any `:actuation/
-  ship-device-unit` proposal may commit -- see `deviceassembly.
-  governor`'s `robotics-simulation-violations`."
+  derived from the device-unit's own recorded thermal-margin fields AND
+  (ADR-2607991500) its own recorded `:connector-plug-mass-kg` via a
+  REAL `physics-2d`-stepped connector mating/insertion-force
+  simulation, not an LLM guess; the Assembly Governor still
+  independently re-derives :passed? from those same fields before any
+  `:actuation/ship-device-unit` proposal may commit -- see
+  `deviceassembly.governor`'s `robotics-simulation-violations`."
   [db {:keys [subject]}]
   (let [a (store/device-unit db subject)]
     (if (nil? a)
       {:summary "対象デバイスユニット記録が見つかりません" :rationale "no device-unit record"
        :cites [] :effect :device-unit/upsert :value {:id subject :robotics-sim-verified? false}
        :stake nil :confidence 0.0}
-      (let [{:keys [mission actions passed?]} (robotics/simulate-burn-in-cell subject a)]
+      (let [{:keys [mission actions passed? sim-peak-insertion-force-n sim-peak-decel-mps2]}
+            (robotics/simulate-burn-in-cell subject a)]
         {:summary    (str subject ": バーンインセル検証ミッション " (if passed? "合格" "不合格"))
          :rationale  (str "mission=" (:mission/id mission) " actions=" (count actions)
-                          " thermal-margin-deviation-actual=" (:thermal-margin-deviation-actual a))
+                          " thermal-margin-deviation-actual=" (:thermal-margin-deviation-actual a)
+                          " sim-peak-insertion-force-n=" sim-peak-insertion-force-n)
          :cites      [(:mission/id mission)]
          :effect     :device-unit/upsert
          :value      {:id subject
                       :robotics-sim-verified? passed?
+                      :sim-peak-insertion-force-n sim-peak-insertion-force-n
+                      :sim-peak-decel-mps2 sim-peak-decel-mps2
                       :robotics-sim-record {:mission-id (:mission/id mission)
                                             :actions (mapv #(dissoc % :action) actions)
                                             :passed? passed?}}

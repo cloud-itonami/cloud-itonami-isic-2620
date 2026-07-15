@@ -57,7 +57,24 @@
                                        stored -- the same 'ground
                                        truth, not self-report'
                                        discipline check 4 below uses
-                                       for EMC emissions.
+                                       for EMC emissions. ADR-2607991500
+                                       ADDS a second independent
+                                       recheck alongside this one (never
+                                       replacing it): whether the
+                                       device-unit's own recorded REAL
+                                       `physics-2d`-simulated connector
+                                       mating/insertion-force telemetry
+                                       (`:sim-peak-insertion-force-n`)
+                                       exceeds its real disclosed
+                                       ceiling (`deviceassembly.
+                                       robotics/connector-mating-force-
+                                       out-of-tolerance?`) -- the SAME
+                                       'ground truth, not self-report'
+                                       discipline, an unrelated QA
+                                       domain (connector mechanical
+                                       mating, not thermal/EMC) folded
+                                       into the SAME robotics-simulation
+                                       HARD check.
     4. Device-unit EMC emission out
        of range                      -- for `:actuation/ship-device-
                                        unit`, INDEPENDENTLY recompute
@@ -165,8 +182,13 @@
   was recorded on the device-unit (`:robotics-sim-verified?`), OR if it
   did but an INDEPENDENT recompute of the device-unit's own thermal-
   margin fields (`deviceassembly.robotics/simulation-out-of-
-  tolerance?`) says out-of-tolerance right now -- never trusts the
-  mission's own stored :passed? verdict alone, the same discipline
+  tolerance?`) says out-of-tolerance right now, OR (ADR-2607991500,
+  ADDED alongside the thermal-margin recheck, never replacing it) an
+  INDEPENDENT recompute of the device-unit's own recorded REAL
+  `physics-2d`-simulated connector mating/insertion-force telemetry
+  (`deviceassembly.robotics/connector-mating-force-out-of-tolerance?`)
+  says out-of-tolerance right now -- never trusts the mission's own
+  stored :passed? verdict alone for either check, the same discipline
   `device-unit-emc-emission-out-of-range-violations` below uses for
   EMC emissions."
   [{:keys [op subject]} st]
@@ -181,7 +203,12 @@
         [{:rule :robotics-simulation-out-of-tolerance
           :detail (str subject " の熱マージン実測値("
                        (:thermal-margin-deviation-actual a) ")が独立再検証で許容範囲["
-                       (:thermal-margin-deviation-min a) "," (:thermal-margin-deviation-max a) "]を逸脱")}]))))
+                       (:thermal-margin-deviation-min a) "," (:thermal-margin-deviation-max a) "]を逸脱")}]
+
+        (robotics/connector-mating-force-out-of-tolerance? a)
+        [{:rule :connector-mating-force-out-of-tolerance
+          :detail (str subject " の実測コネクタ嵌合力(" (:sim-peak-insertion-force-n a)
+                       "N)が独立再検証で許容上限(" robotics/max-insertion-force-n "N)を超過")}]))))
 
 (defn- device-unit-emc-emission-out-of-range-violations
   "For `:actuation/ship-device-unit`, INDEPENDENTLY recompute whether

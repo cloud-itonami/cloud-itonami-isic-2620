@@ -37,6 +37,7 @@
   (:require #?(:clj  [clojure.edn :as edn]
                :cljs [cljs.reader :as edn])
             [deviceassembly.registry :as registry]
+            [deviceassembly.robotics :as robotics]
             [langchain.db :as d]))
 
 (defprotocol Store
@@ -57,47 +58,100 @@
 
 ;; ----------------------------- demo data -----------------------------
 
+(defn- with-connector-mating-telemetry
+  "Merges REAL connector mating/insertion-force telemetry
+  (ADR-2607991500) onto a demo device-unit's base fields --
+  `deviceassembly.robotics/connector-mating-telemetry-for` actually
+  runs `run-connector-mating-test`'s `physics-2d`-stepped simulation
+  for this device-unit's own `:connector-plug-mass-kg`, so even the
+  'already on file' seed data (as if from an earlier real
+  insertion-force test report) is genuinely simulation-derived, never
+  hand-typed doubles."
+  [base]
+  (merge base (select-keys (robotics/connector-mating-telemetry-for base)
+                           [:sim-peak-insertion-force-n :sim-peak-decel-mps2])))
+
 (defn demo-data
   "A small, self-contained device-unit set covering both actuation
   lifecycles (shipping a device-unit, issuing a Declaration of
-  Conformity) so the actor + tests run offline."
+  Conformity) so the actor + tests run offline.
+  `:connector-plug-mass-kg` (ADR-2607991500) is a permanent device-unit
+  connector-mating-test-rig field (like `:thermal-margin-deviation-
+  actual`); `:sim-peak-insertion-force-n`/`:sim-peak-decel-mps2` are
+  the REAL `deviceassembly.robotics/run-connector-mating-test`-computed
+  telemetry for that field (`with-connector-mating-telemetry`), the
+  ground truth `deviceassembly.robotics/connector-mating-force-out-of-
+  tolerance?` independently rechecks. device-unit-5 keeps its
+  PRE-EXISTING out-of-tolerance scenario (`:thermal-margin-deviation-
+  actual` 0.30, outside [-0.05,0.05]) unrelated to this ADR.
+  device-unit-6 is a NEW, SEPARATE scenario: it is DELIBERATELY
+  recorded with a much heavier `:connector-plug-mass-kg` (5.0 kg) than
+  a small-form-factor computer/peripheral connector-mating test rig
+  should ever carry -- a genuine design-record inconsistency (no real
+  USB-C/HDMI/M.2-class connector insertion-force rig should run at
+  anywhere near this probe mass -- it would risk connector-housing/
+  board-level damage) that the real, re-run simulation catches on
+  independent recheck even though `:robotics-sim-verified?` was seeded
+  `true` ('already on file', i.e. someone/something marked it passed
+  without this real check ever having run) -- this fleet's now-familiar
+  device-5/lot-5/vehicle-5 misclassified-record pattern, one index over
+  since device-unit-5 already carries the pre-existing thermal-margin
+  scenario. device-unit-1..4's `:connector-plug-mass-kg` values (1.2-
+  1.35 kg) are all genuinely consistent connector-mating-test-rig
+  masses, which all clear the real insertion-force ceiling with margin
+  (see `deviceassembly.robotics/max-insertion-force-n`)."
   []
   {:device-units
-   {"device-unit-1" {:id "device-unit-1" :device-unit-name "Sakura Notebook NB-14"
-                      :emc-emission-deviation-actual 0.05 :emc-emission-deviation-min -0.10 :emc-emission-deviation-max 0.10
-                      :thermal-margin-deviation-actual 0.02 :thermal-margin-deviation-min -0.05 :thermal-margin-deviation-max 0.05
-                      :eol-defect-unresolved? false
-                      :robotics-sim-verified? false :robotics-sim-record nil
-                      :device-unit-shipped? false :declaration-issued? false
-                      :jurisdiction "JPN" :status :intake}
-    "device-unit-2" {:id "device-unit-2" :device-unit-name "Atlantis Server Tower ST-2U"
-                      :emc-emission-deviation-actual 0.05 :emc-emission-deviation-min -0.10 :emc-emission-deviation-max 0.10
-                      :thermal-margin-deviation-actual 0.02 :thermal-margin-deviation-min -0.05 :thermal-margin-deviation-max 0.05
-                      :eol-defect-unresolved? false
-                      :robotics-sim-verified? false :robotics-sim-record nil
-                      :device-unit-shipped? false :declaration-issued? false
-                      :jurisdiction "ATL" :status :intake}
-    "device-unit-3" {:id "device-unit-3" :device-unit-name "鈴木デスクトップ DT-07"
-                      :emc-emission-deviation-actual 0.35 :emc-emission-deviation-min -0.10 :emc-emission-deviation-max 0.10
-                      :thermal-margin-deviation-actual 0.02 :thermal-margin-deviation-min -0.05 :thermal-margin-deviation-max 0.05
-                      :eol-defect-unresolved? false
-                      :robotics-sim-verified? false :robotics-sim-record nil
-                      :device-unit-shipped? false :declaration-issued? false
-                      :jurisdiction "JPN" :status :intake}
-    "device-unit-4" {:id "device-unit-4" :device-unit-name "田中モニタユニット MU-24"
-                      :emc-emission-deviation-actual 0.05 :emc-emission-deviation-min -0.10 :emc-emission-deviation-max 0.10
-                      :thermal-margin-deviation-actual 0.02 :thermal-margin-deviation-min -0.05 :thermal-margin-deviation-max 0.05
-                      :eol-defect-unresolved? true
-                      :robotics-sim-verified? false :robotics-sim-record nil
-                      :device-unit-shipped? false :declaration-issued? false
-                      :jurisdiction "JPN" :status :intake}
-    "device-unit-5" {:id "device-unit-5" :device-unit-name "佐藤オールインワンPC AiO-09"
-                      :emc-emission-deviation-actual 0.05 :emc-emission-deviation-min -0.10 :emc-emission-deviation-max 0.10
-                      :thermal-margin-deviation-actual 0.30 :thermal-margin-deviation-min -0.05 :thermal-margin-deviation-max 0.05
-                      :eol-defect-unresolved? false
-                      :robotics-sim-verified? true :robotics-sim-record nil
-                      :device-unit-shipped? false :declaration-issued? false
-                      :jurisdiction "JPN" :status :intake}}})
+   (into {}
+         (map (fn [v] [(:id v) (with-connector-mating-telemetry v)]))
+         [{:id "device-unit-1" :device-unit-name "Sakura Notebook NB-14"
+           :emc-emission-deviation-actual 0.05 :emc-emission-deviation-min -0.10 :emc-emission-deviation-max 0.10
+           :thermal-margin-deviation-actual 0.02 :thermal-margin-deviation-min -0.05 :thermal-margin-deviation-max 0.05
+           :connector-plug-mass-kg 1.2
+           :eol-defect-unresolved? false
+           :robotics-sim-verified? false :robotics-sim-record nil
+           :device-unit-shipped? false :declaration-issued? false
+           :jurisdiction "JPN" :status :intake}
+          {:id "device-unit-2" :device-unit-name "Atlantis Server Tower ST-2U"
+           :emc-emission-deviation-actual 0.05 :emc-emission-deviation-min -0.10 :emc-emission-deviation-max 0.10
+           :thermal-margin-deviation-actual 0.02 :thermal-margin-deviation-min -0.05 :thermal-margin-deviation-max 0.05
+           :connector-plug-mass-kg 1.3
+           :eol-defect-unresolved? false
+           :robotics-sim-verified? false :robotics-sim-record nil
+           :device-unit-shipped? false :declaration-issued? false
+           :jurisdiction "ATL" :status :intake}
+          {:id "device-unit-3" :device-unit-name "鈴木デスクトップ DT-07"
+           :emc-emission-deviation-actual 0.35 :emc-emission-deviation-min -0.10 :emc-emission-deviation-max 0.10
+           :thermal-margin-deviation-actual 0.02 :thermal-margin-deviation-min -0.05 :thermal-margin-deviation-max 0.05
+           :connector-plug-mass-kg 1.25
+           :eol-defect-unresolved? false
+           :robotics-sim-verified? false :robotics-sim-record nil
+           :device-unit-shipped? false :declaration-issued? false
+           :jurisdiction "JPN" :status :intake}
+          {:id "device-unit-4" :device-unit-name "田中モニタユニット MU-24"
+           :emc-emission-deviation-actual 0.05 :emc-emission-deviation-min -0.10 :emc-emission-deviation-max 0.10
+           :thermal-margin-deviation-actual 0.02 :thermal-margin-deviation-min -0.05 :thermal-margin-deviation-max 0.05
+           :connector-plug-mass-kg 1.3
+           :eol-defect-unresolved? true
+           :robotics-sim-verified? false :robotics-sim-record nil
+           :device-unit-shipped? false :declaration-issued? false
+           :jurisdiction "JPN" :status :intake}
+          {:id "device-unit-5" :device-unit-name "佐藤オールインワンPC AiO-09"
+           :emc-emission-deviation-actual 0.05 :emc-emission-deviation-min -0.10 :emc-emission-deviation-max 0.10
+           :thermal-margin-deviation-actual 0.30 :thermal-margin-deviation-min -0.05 :thermal-margin-deviation-max 0.05
+           :connector-plug-mass-kg 1.3
+           :eol-defect-unresolved? false
+           :robotics-sim-verified? true :robotics-sim-record nil
+           :device-unit-shipped? false :declaration-issued? false
+           :jurisdiction "JPN" :status :intake}
+          {:id "device-unit-6" :device-unit-name "山本ミニPC MP-03"
+           :emc-emission-deviation-actual 0.05 :emc-emission-deviation-min -0.10 :emc-emission-deviation-max 0.10
+           :thermal-margin-deviation-actual 0.02 :thermal-margin-deviation-min -0.05 :thermal-margin-deviation-max 0.05
+           :connector-plug-mass-kg 5.0
+           :eol-defect-unresolved? false
+           :robotics-sim-verified? true :robotics-sim-record nil
+           :device-unit-shipped? false :declaration-issued? false
+           :jurisdiction "JPN" :status :intake}])})
 
 ;; ----------------------------- shared commit logic -----------------------------
 
@@ -209,6 +263,7 @@
 
 (defn- device-unit->tx [{:keys [id device-unit-name emc-emission-deviation-actual emc-emission-deviation-min emc-emission-deviation-max
                                  thermal-margin-deviation-actual thermal-margin-deviation-min thermal-margin-deviation-max
+                                 connector-plug-mass-kg sim-peak-insertion-force-n sim-peak-decel-mps2
                                  eol-defect-unresolved? robotics-sim-verified? robotics-sim-record
                                  device-unit-shipped? declaration-issued?
                                  jurisdiction status shipment-number evidence-number]}]
@@ -220,6 +275,9 @@
     thermal-margin-deviation-actual              (assoc :device-unit/thermal-margin-deviation-actual thermal-margin-deviation-actual)
     thermal-margin-deviation-min                 (assoc :device-unit/thermal-margin-deviation-min thermal-margin-deviation-min)
     thermal-margin-deviation-max                 (assoc :device-unit/thermal-margin-deviation-max thermal-margin-deviation-max)
+    connector-plug-mass-kg                       (assoc :device-unit/connector-plug-mass-kg connector-plug-mass-kg)
+    sim-peak-insertion-force-n                   (assoc :device-unit/sim-peak-insertion-force-n sim-peak-insertion-force-n)
+    (some? sim-peak-decel-mps2)                   (assoc :device-unit/sim-peak-decel-mps2 sim-peak-decel-mps2)
     (some? eol-defect-unresolved?)               (assoc :device-unit/eol-defect-unresolved? eol-defect-unresolved?)
     (some? robotics-sim-verified?)                (assoc :device-unit/robotics-sim-verified? robotics-sim-verified?)
     (some? robotics-sim-record)                   (assoc :device-unit/robotics-sim-record (enc robotics-sim-record))
@@ -234,6 +292,7 @@
   [:device-unit/id :device-unit/device-unit-name :device-unit/emc-emission-deviation-actual
    :device-unit/emc-emission-deviation-min :device-unit/emc-emission-deviation-max
    :device-unit/thermal-margin-deviation-actual :device-unit/thermal-margin-deviation-min :device-unit/thermal-margin-deviation-max
+   :device-unit/connector-plug-mass-kg :device-unit/sim-peak-insertion-force-n :device-unit/sim-peak-decel-mps2
    :device-unit/eol-defect-unresolved? :device-unit/robotics-sim-verified? :device-unit/robotics-sim-record
    :device-unit/device-unit-shipped? :device-unit/declaration-issued?
    :device-unit/jurisdiction :device-unit/status :device-unit/shipment-number :device-unit/evidence-number])
@@ -247,6 +306,9 @@
      :thermal-margin-deviation-actual (:device-unit/thermal-margin-deviation-actual m)
      :thermal-margin-deviation-min (:device-unit/thermal-margin-deviation-min m)
      :thermal-margin-deviation-max (:device-unit/thermal-margin-deviation-max m)
+     :connector-plug-mass-kg (:device-unit/connector-plug-mass-kg m)
+     :sim-peak-insertion-force-n (:device-unit/sim-peak-insertion-force-n m)
+     :sim-peak-decel-mps2 (:device-unit/sim-peak-decel-mps2 m)
      :eol-defect-unresolved? (boolean (:device-unit/eol-defect-unresolved? m))
      :robotics-sim-verified? (boolean (:device-unit/robotics-sim-verified? m))
      :robotics-sim-record (dec* (:device-unit/robotics-sim-record m))

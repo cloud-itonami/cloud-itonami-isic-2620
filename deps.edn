@@ -9,7 +9,27 @@
  :deps {io.github.kotoba-lang/langgraph
         {:local/root "../../kotoba-lang/langgraph"}
         io.github.kotoba-lang/robotics
-        {:local/root "../../kotoba-lang/robotics"}}
+        {:local/root "../../kotoba-lang/robotics"}
+        ;; REAL engineering-simulation dependency (ADR-2607991500, this
+        ;; actor's first real time-stepped physics check, extending
+        ;; ADR-2607142800's/ADR-2607152000's fleet-wide upgrade -- see
+        ;; `autoparts.robotics`/`commsdevice.robotics` for the prior
+        ;; instances of this same dependency): deviceassembly.robotics
+        ;; now actually calls physics-2d/world-step -- a real, tested
+        ;; time-stepped rigid-body impulse solver -- to run a real
+        ;; connector mating/insertion-force test simulation, ADDITIONAL
+        ;; to (never replacing) the existing symbolic thermal-margin
+        ;; field comparison. This vertical has no design-library
+        ;; sibling repo, so the physics module is built directly in
+        ;; deviceassembly.robotics and the ONLY new dependency is
+        ;; physics-2d itself, taken as a real pinned git-coordinate dep
+        ;; (not :local/root) so this repo stays forkable standalone
+        ;; outside the monorepo -- the same reasoning `autoparts.
+        ;; robotics`/`commsdevice.robotics` already established, using
+        ;; the SAME fleet-standard SHA pin those two repos currently use.
+        io.github.kotoba-lang/physics-2d
+        {:git/url "https://github.com/kotoba-lang/physics-2d.git"
+         :sha "03b6c23c8d9aa36b92a8130fd3e37fc2548b4d26"}}
  :aliases
  {;; offline workspace dev -- pin transitive langchain to local checkout
   :dev {:override-deps
