@@ -64,6 +64,19 @@ independently re-derives the device-unit's own thermal-margin
 tolerance from ground-truth fields, never trusting the mission's
 self-reported verdict alone.
 
+**A second, REAL time-stepped physics check rides alongside it**
+(ADR-2607991500): the mission's fourth step actually time-steps a
+`kotoba-lang/physics-2d` rigid-body world for a CONNECTOR MATING/
+INSERTION-FORCE TEST -- a real computer/peripheral-equipment QA
+procedure (IEC 60512-13-1-style: a connector plug approaches and seats
+into its receptacle at a controlled rate, and the peak force at
+seating is read off the actual simulated trajectory, never invented).
+This is additional to, not a replacement for, the burn-in/EMC
+thermal-margin check above -- the two verify unrelated QA domains. The
+Assembly Governor independently re-derives BOTH the thermal-margin
+verdict and the connector-mating-force verdict from ground-truth
+fields before `:actuation/ship-device-unit` may commit.
+
 ## Core contract
 
 ```text
@@ -90,8 +103,8 @@ device-assembly plant's own acts.
 | `:device-unit/intake` | normalize device-unit directory patch (phase 3 may auto-commit when clean) |
 | `:compliance-rules/verify` | per-jurisdiction EMC/product-safety compliance evidence checklist (always human) |
 | `:end-of-line-quality/screen` | end-of-line defect screen (HARD hold if unresolved) |
-| `:robotics/simulate-burn-in-cell` | robot burn-in-cell verification mission (always human; required on file before shipment) |
-| `:actuation/ship-device-unit` | draft device-unit-shipment record (always human; HARD hold if robotics-sim missing or independently out-of-tolerance) |
+| `:robotics/simulate-burn-in-cell` | robot burn-in-cell verification mission -- thermal burn-in/EMC pre-scan AND (ADR-2607991500) a real `physics-2d` connector mating/insertion-force test (always human; required on file before shipment) |
+| `:actuation/ship-device-unit` | draft device-unit-shipment record (always human; HARD hold if robotics-sim missing, or either the thermal-margin or the connector-mating-force reading is independently out-of-tolerance) |
 | `:actuation/issue-declaration-of-conformity` | draft Declaration-of-Conformity record (always human) |
 
 ## Social / regulatory hand-off
