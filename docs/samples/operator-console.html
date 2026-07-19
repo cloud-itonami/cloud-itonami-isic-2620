@@ -1,4 +1,4 @@
-<html><head><meta charset="utf-8"><title>cloud-itonami-isic-2620 · device-assembly plant</title><style>
+<html><head><meta charset="utf-8"><title>cloud-itonami-isic-2620 &middot; computer &amp; peripheral equipment manufacturing</title><style>
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .ok { color: #137a3f; }
 body { font-family: system-ui,-apple-system,sans-serif; margin: 0; color: #1a1a1a; background: #fafafa; }
@@ -6,7 +6,7 @@ header.bar { display: flex; align-items: center; gap: 12px; padding: 12px 20px; 
 th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #f0f0f0; }
 h2 { margin-top: 0; font-size: 15px; }
 .warn { color: #b25c00; background: #fff8e1; padding: 2px 6px; border-radius: 4px; }
-main { max-width: 980px; margin: 24px auto; padding: 0 20px; }
+main { max-width: 1080px; margin: 24px auto; padding: 0 20px; }
 header.bar h1 { font-size: 18px; margin: 0; font-weight: 600; }
 .muted { color: #888; font-size: 13px; }
 .critical { color: #fff; background: #b3261e; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
@@ -17,46 +17,67 @@ header.bar .badge { margin-left: auto; font-size: 12px; color: #666; }
 code { font-size: 12px; background: #f4f4f4; padding: 1px 4px; border-radius: 3px; }
 </style></head><body>
 <header class="bar">
-  <h1>Device-assembly plant (ISIC 2620) — Operator Console</h1>
-  <span class="badge">read-only sample · governor-gated · never dispatches hardware</span>
+  <h1>Computer &amp; peripheral equipment manufacturing (ISIC 2620) — Operator Console</h1>
+  <span class="badge">read-only sample · governor-gated · shipment/Declaration-of-Conformity actuation always human</span>
 </header>
 <main>
   <section class="card">
-    <h2>Device Units</h2>
-    <p class="muted">Demo snapshot — live data from <code>deviceassembly.store</code> / <code>clojure -M:dev:run</code>.</p>
+    <h2>Device units</h2>
+    <p class="muted">Demo snapshot — build-time-generated from <code>deviceassembly.store</code> via <code>deviceassembly.render-html</code> (<code>clojure -M:dev:render-html</code>), regenerated nightly. EMC-emission bounds, connector-mating peak insertion force (real <code>physics-2d</code>-simulated telemetry, ADR-2607991500), and Shipped/Declared are ground truth the governor independently re-derives — never trusted from a proposal's own report.</p>
     <table>
-      <thead><tr><th>Device Unit</th><th>Name</th><th>Jurisdiction</th><th>EMC emission</th><th>EOL</th><th>Status</th></tr></thead>
+      <thead><tr><th>Device unit</th><th>Name</th><th>Jurisdiction</th><th>EMC emission dev.</th><th>Connector mass (kg)</th><th>Peak insertion force (N)</th><th>EOL</th><th>Robotics sim on file</th><th>Shipped / Declared</th><th>Last op status</th></tr></thead>
       <tbody>
-        <tr><td>device-unit-1</td><td>Sakura Notebook NB-14</td><td>JPN</td><td class="ok">0.05 ∈ [-0.10,0.10]</td><td class="ok">resolved</td><td class="ok">ready</td></tr>
-        <tr><td>device-unit-2</td><td>Atlantis Server Tower ST-2U</td><td>ATL</td><td class="ok">in-spec</td><td class="ok">—</td><td><span class="err">no spec-basis</span></td></tr>
-        <tr><td>device-unit-3</td><td>鈴木デスクトップ DT-07</td><td>JPN</td><td><span class="err">0.35 out of range</span></td><td class="ok">—</td><td><span class="warn">HARD hold on shipment</span></td></tr>
-        <tr><td>device-unit-4</td><td>田中モニタユニット MU-24</td><td>JPN</td><td class="ok">in-spec</td><td><span class="err">unresolved</span></td><td><span class="critical">EOL hold</span></td></tr>
+        <tr><td>device-unit-1</td><td>Sakura Notebook NB-14</td><td>JPN</td><td>0.05 &isin; [-0.1,0.1]</td><td>1.2</td><td>9.0</td><td><span class="ok">resolved</span></td><td><span class="ok">yes</span></td><td><span class="ok">shipped</span> / <span class="ok">declared</span></td><td><span class="critical">HARD hold &middot; already-shipped</span></td></tr>
+        <tr><td>device-unit-2</td><td>Atlantis Server Tower ST-2U</td><td>ATL</td><td>0.05 &isin; [-0.1,0.1]</td><td>1.3</td><td>9.75</td><td><span class="ok">resolved</span></td><td><span class="muted">no</span></td><td><span class="muted">not shipped</span> / <span class="muted">not declared</span></td><td><span class="critical">HARD hold &middot; no-spec-basis</span></td></tr>
+        <tr><td>device-unit-3</td><td>鈴木デスクトップ DT-07</td><td>JPN</td><td>0.35 &isin; [-0.1,0.1]</td><td>1.25</td><td>9.375</td><td><span class="ok">resolved</span></td><td><span class="muted">no</span></td><td><span class="muted">not shipped</span> / <span class="muted">not declared</span></td><td><span class="muted">no activity</span></td></tr>
+        <tr><td>device-unit-4</td><td>田中モニタユニット MU-24</td><td>JPN</td><td>0.05 &isin; [-0.1,0.1]</td><td>1.3</td><td>9.75</td><td><span class="err">unresolved</span></td><td><span class="muted">no</span></td><td><span class="muted">not shipped</span> / <span class="muted">not declared</span></td><td><span class="critical">HARD hold &middot; end-of-line-defect-unresolved</span></td></tr>
+        <tr><td>device-unit-5</td><td>佐藤オールインワンPC AiO-09</td><td>JPN</td><td>0.05 &isin; [-0.1,0.1]</td><td>1.3</td><td>9.75</td><td><span class="ok">resolved</span></td><td><span class="ok">yes</span></td><td><span class="muted">not shipped</span> / <span class="muted">not declared</span></td><td><span class="muted">no activity</span></td></tr>
+        <tr><td>device-unit-6</td><td>山本ミニPC MP-03</td><td>JPN</td><td>0.05 &isin; [-0.1,0.1]</td><td>5.0</td><td>37.5</td><td><span class="ok">resolved</span></td><td><span class="ok">yes</span></td><td><span class="muted">not shipped</span> / <span class="muted">not declared</span></td><td><span class="critical">HARD hold &middot; evidence-incomplete, connector-mating-force-out-of-tolerance</span></td></tr>
       </tbody>
     </table>
   </section>
   <section class="card">
     <h2>Action gate (Assembly Governor)</h2>
-    <p class="muted">HARD holds cannot be overridden. Actuation always escalates to a human compliance engineer.</p>
+    <p class="muted">HARD holds cannot be overridden by any phase or human approval. Shipment and Declaration-of-Conformity actuation are always a human compliance engineer's call, at every phase.</p>
     <table>
-      <thead><tr><th>Op</th><th>Stake</th><th>Gate</th></tr></thead>
+      <thead><tr><th>Op</th><th>Gate</th></tr></thead>
       <tbody>
-        <tr><td><code>:device-unit/intake</code></td><td>none</td><td><span class="ok">phase-3 auto when clean</span></td></tr>
-        <tr><td><code>:compliance-rules/verify</code></td><td>none</td><td><span class="warn">human approval · no fabricated compliance rules</span></td></tr>
-        <tr><td><code>:end-of-line-quality/screen</code></td><td>none</td><td><span class="critical">HARD hold if unresolved defect</span></td></tr>
-        <tr><td><code>:robotics/simulate-burn-in-cell</code></td><td>none</td><td><span class="warn">human approval · required on file before shipment</span></td></tr>
-        <tr><td><code>:actuation/ship-device-unit</code></td><td class="critical">safety-critical</td><td><span class="warn">always human · robotics + EMC + evidence checks</span></td></tr>
-        <tr><td><code>:actuation/issue-declaration-of-conformity</code></td><td class="critical">safety-critical</td><td><span class="warn">always human · EOL + double-issue guard</span></td></tr>
+        <tr><td><code>:device-unit/intake</code></td><td><span class="ok">auto-commit when clean, phase-3 (the ONLY phase-3 auto op)</span></td></tr>
+        <tr><td><code>:compliance-rules/verify</code></td><td><span class="warn">human approval (phase-gated, never auto-eligible) &middot; spec-basis independently re-checked -- no jurisdiction requirements ever fabricated</span></td></tr>
+        <tr><td><code>:end-of-line-quality/screen</code></td><td><span class="critical">unresolved defect is a HARD, un-overridable hold</span></td></tr>
+        <tr><td><code>:robotics/simulate-burn-in-cell</code></td><td><span class="warn">human approval &middot; runs the REAL burn-in + connector-mating <code>physics-2d</code> mission</span></td></tr>
+        <tr><td><code>:actuation/ship-device-unit</code></td><td><span class="warn">ALWAYS human approval (safety-critical, regardless of confidence) &middot; evidence/robotics-sim/EMC independently re-checked &middot; double-shipment blocked</span></td></tr>
+        <tr><td><code>:actuation/issue-declaration-of-conformity</code></td><td><span class="warn">ALWAYS human approval (safety-critical) &middot; end-of-line defect independently re-checked &middot; double-issuance blocked</span></td></tr>
       </tbody>
     </table>
   </section>
   <section class="card">
-    <h2>Social hand-off</h2>
-    <p class="muted">Audit package for compliance inspectors / market-surveillance authorities — <code>deviceassembly.export/audit-package</code> and <code>package-&gt;csv-bundle</code> (device-units / ledger / shipments / declarations-of-conformity CSV).</p>
+    <h2>Draft shipment / Declaration-of-Conformity records</h2>
+    <p class="muted">Unsigned drafts (<code>deviceassembly.registry</code>) — the plant's own signature/submission is a separate, later act, never performed by this actor.</p>
     <table>
-      <thead><tr><th>Artifact</th><th>Kind</th><th>Note</th></tr></thead>
+      <thead><tr><th>Record id</th><th>Kind</th><th>Device unit</th><th>Jurisdiction</th></tr></thead>
       <tbody>
-        <tr><td>JPN-SHP-000000</td><td>device-unit-shipment-draft</td><td>unsigned · plant signs offline</td></tr>
-        <tr><td>JPN-DOC-000000</td><td>declaration-of-conformity-draft</td><td>unsigned · market-surveillance submission is plant act</td></tr>
+        <tr><td>JPN-SHP-000000</td><td>device-unit-shipment-draft</td><td>device-unit-1</td><td>JPN</td></tr>
+        <tr><td>JPN-DOC-000000</td><td>declaration-of-conformity-draft</td><td>device-unit-1</td><td>JPN</td></tr>
+      </tbody>
+    </table>
+  </section>
+  <section class="card">
+    <h2>Audit ledger (this run)</h2>
+    <p class="muted">Append-only decision-fact log — every proposal, hold and commit this scenario produced.</p>
+    <table>
+      <thead><tr><th>Fact</th><th>Op</th><th>Subject</th><th>Basis</th></tr></thead>
+      <tbody>
+        <tr><td>committed</td><td><code>intake</code></td><td>device-unit-1</td><td>id, device-unit-name</td></tr>
+        <tr><td>committed</td><td><code>verify</code></td><td>device-unit-1</td><td>電気用品安全法 (Electrical Appliance and Material Safety Law, PSE) / VCCI協会技術基準 (参考、自主規制), https://www.vcci.jp/</td></tr>
+        <tr><td>committed</td><td><code>screen</code></td><td>device-unit-1</td><td>eol-check</td></tr>
+        <tr><td>committed</td><td><code>simulate-burn-in-cell</code></td><td>device-unit-1</td><td>mission-device-unit-1-burn-in-verify</td></tr>
+        <tr><td>committed</td><td><code>ship-device-unit</code></td><td>device-unit-1</td><td>device-unit-1</td></tr>
+        <tr><td>committed</td><td><code>issue-declaration-of-conformity</code></td><td>device-unit-1</td><td>device-unit-1</td></tr>
+        <tr><td>governor-hold</td><td><code>verify</code></td><td>device-unit-2</td><td>no-spec-basis</td></tr>
+        <tr><td>governor-hold</td><td><code>screen</code></td><td>device-unit-4</td><td>end-of-line-defect-unresolved</td></tr>
+        <tr><td>governor-hold</td><td><code>ship-device-unit</code></td><td>device-unit-6</td><td>evidence-incomplete, connector-mating-force-out-of-tolerance</td></tr>
+        <tr><td>governor-hold</td><td><code>ship-device-unit</code></td><td>device-unit-1</td><td>already-shipped</td></tr>
       </tbody>
     </table>
   </section>
