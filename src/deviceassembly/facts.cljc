@@ -44,7 +44,36 @@
           :required-evidence ["EMC-Prüfbericht (EMC-test-report)"
                               "RoHS-Werkstofferklärung (RoHS-material-declaration)"
                               "IEC-62368-1-Sicherheitsprüfbericht (IEC-62368-1-safety-test-report)"
-                              "Endkontroll-Rückverfolgbarkeitsnachweis (end-of-line-quality-chain-of-custody-record)"]}})
+                              "Endkontroll-Rückverfolgbarkeitsnachweis (end-of-line-quality-chain-of-custody-record)"]}
+   ;; ITA gap disclosure (honest, non-fabrication discipline per the ns
+   ;; docstring above): every decree number/date/title below was fetched
+   ;; and read directly from normattiva.it this session (Italy's official
+   ;; legislative-text portal) -- not recalled from training data. Two
+   ;; things could NOT be independently confirmed and are deliberately
+   ;; left out rather than guessed: (i) the exact vigilanza
+   ;; (market-surveillance) authority split for RoHS enforcement across
+   ;; MASE / MIMIT / regions (D.Lgs. 27/2014 Capo IV, artt. 19-21) --
+   ;; normattiva.it only serves the preamble + Art. 1 of each atto
+   ;; through the plain uri-res permalink; its per-article
+   ;; `caricaArticolo` AJAX endpoint 500'd when fetched directly outside
+   ;; its own session flow, so :owner-authority below only claims what
+   ;; the fetched preamble text itself supports (MASE as the decree's
+   ;; proposing ministry) and does NOT name a specific market-surveillance
+   ;; body; (ii) any specific "Registro Nazionale AEE" producer-registry
+   ;; name/number -- :national-spec below cites only the "Sistemi
+   ;; Collettivi" / CdC RAEE producer-compliance mechanism that MASE's own
+   ;; mase.gov.it news page (fetched this session, dated 15 luglio 2026)
+   ;; names directly.
+   "ITA" {:name "Italy (EU CE marking)"
+          :owner-authority "Ministero dell'Ambiente e della Sicurezza Energetica (MASE -- proposing ministry for the RoHS and RAEE/WEEE decreti legislativi below) + Centro di Coordinamento RAEE (CdC RAEE -- operational coordinator of the Sistemi Collettivi producer-compliance schemes named on mase.gov.it) / EU CE marking (Dichiarazione di Conformità del fabbricante, manufacturer self-declaration)"
+          :legal-basis "D.Lgs. 6 novembre 2007, n. 194 (attuazione direttiva EMC 2004/108/CE; testo vigente aggiornato -- 'Ultimo aggiornamento all'atto pubblicato il 25/05/2016' -- dal D.Lgs. 18 maggio 2016, n. 80 per recepire la direttiva EMC 2014/30/UE, rifusione) + D.Lgs. 4 marzo 2014, n. 27 (attuazione della direttiva RoHS 2011/65/UE) + D.Lgs. 14 marzo 2014, n. 49 (attuazione della direttiva WEEE 2012/19/UE sui rifiuti di apparecchiature elettriche ed elettroniche -- RAEE) -- tutti e tre confermati vigenti su normattiva.it in questa sessione (Referenz, non un’estrazione articolo-per-articolo)"
+          :national-spec "EU CE-marking Dichiarazione di Conformità per apparecchiature IT/AEE (autodichiarazione del fabbricante) + restrizione RoHS delle sostanze pericolose ai sensi del D.Lgs. 27/2014 + responsabilità estesa del produttore per i RAEE tramite i Sistemi Collettivi coordinati dal CdC RAEE ai sensi del D.Lgs. 49/2014"
+          :provenance "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2007-11-06;194 (EMC, D.Lgs. 194/2007 as amended by D.Lgs. 80/2016) ; https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2014-03-04;27 (RoHS, D.Lgs. 27/2014) ; https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2014-03-14;49 (WEEE/RAEE, D.Lgs. 49/2014) ; https://www.mase.gov.it/portale/web/guest/-/mase-e-cdc-raee-siglano-un-accordo-per-potenziare-la-raccolta-dei-raee-in-istituzioni-e-aziende (MASE/CdC RAEE, Sistemi Collettivi)"
+          :required-evidence ["EMC-test-report (rapporto di prova EMC ai sensi del D.Lgs. 194/2007 come aggiornato dal D.Lgs. 80/2016)"
+                              "RoHS-material-declaration (dichiarazione di conformità RoHS ai sensi del D.Lgs. 27/2014)"
+                              "IEC-62368-1-safety-test-report"
+                              "RAEE-producer-compliance-record (adesione a un Sistema Collettivo RAEE coordinato dal CdC RAEE ai sensi del D.Lgs. 49/2014)"
+                              "end-of-line-quality-chain-of-custody-record"]}})
 
 (defn spec-basis [iso3] (get catalog iso3))
 
