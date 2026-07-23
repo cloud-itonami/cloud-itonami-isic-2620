@@ -73,7 +73,39 @@
                               "RoHS-material-declaration (dichiarazione di conformità RoHS ai sensi del D.Lgs. 27/2014)"
                               "IEC-62368-1-safety-test-report"
                               "RAEE-producer-compliance-record (adesione a un Sistema Collettivo RAEE coordinato dal CdC RAEE ai sensi del D.Lgs. 49/2014)"
-                              "end-of-line-quality-chain-of-custody-record"]}})
+                              "end-of-line-quality-chain-of-custody-record"]}
+   ;; CAN gap disclosure (honest, non-fabrication discipline per the ns
+   ;; docstring above): every quote below was fetched and read directly
+   ;; this session from ised-isde.canada.ca (ISED's own site) and
+   ;; laws-lois.justice.gc.ca (Canada's official consolidated-statutes
+   ;; portal) -- not recalled from training data. The ICES-003 (Issue 7,
+   ;; October 2020) and ICES-Gen (Issue 2, February 23 2024) PDFs were
+   ;; fetched and read page-by-page directly (not just summarized);
+   ;; ICES-Gen s.3.3 is the source for the Category II / Supplier's
+   ;; Declaration of Conformity (SDoC) self-certification characterization
+   ;; below ("Category II equipment is exempt from certification and
+   ;; registration. The label placed on each unit of the interference-
+   ;; causing equipment model, according to the applicable ICES standard,
+   ;; represents the SDoC with ISED requirements."). One thing could NOT
+   ;; be independently confirmed and is deliberately left out rather than
+   ;; guessed: the specific Canadian national safety-standard number for
+   ;; IT-equipment electrical safety (expected to be a CSA/UL binational
+   ;; standard such as "CAN/CSA-C22.2 No. 62368-1") -- the CSA Group store
+   ;; page returned HTTP 403 to a direct fetch and had no Wayback Machine
+   ;; snapshot, so per this fleet's hard rule against bypassing bot
+   ;; blocks, :required-evidence below cites only the jurisdiction-neutral
+   ;; `IEC-62368-1-safety-test-report` shared anchor already established
+   ;; by every other entry in this catalog, not a Canada-specific standard
+   ;; number.
+   "CAN" {:name "Canada"
+          :owner-authority "Innovation, Science and Economic Development Canada (ISED), Spectrum Management and Telecommunications / Engineering, Planning and Standards Branch -- Category II equipment Supplier's Declaration of Conformity (SDoC); no ISED certification or registration required (Radiocommunication Regulations, SOR/96-484, s.21(5))"
+          :legal-basis "Radiocommunication Act (R.S.C., 1985, c. R-2) s.2 (\"interference-causing equipment means any device, machinery or equipment, other than radio apparatus, that causes or is capable of causing interference to radiocommunication\") + s.5(1) (Minister's power to issue technical acceptance certificates and to establish technical requirements and technical standards for interference-causing equipment) + Radiocommunication Regulations (SOR/96-484) s.21(5) (Category II equipment listed in the Category II Equipment Standards List does not require a TAC) -- ICES-003, Issue 7, October 2020, \"Information Technology Equipment (including Digital Apparatus)\" + ICES-Gen, Issue 2, February 23 2024, \"General Requirements for Compliance of Interference-Causing Equipment\" s.3.3 (Supplier's Declaration of Conformity, reference)"
+          :national-spec "Canada Supplier's Declaration of Conformity (SDoC) self-certification under ICES-003 (radio-frequency emission limits + administrative/labelling requirements) for information technology equipment and digital apparatus generating/using timing signals at or above 9 kHz -- Category II interference-causing equipment, exempt from ISED certification and registration; the CAN ICES-003(A or B) / NMB-003(A ou B) compliance label itself represents the SDoC"
+          :provenance "https://ised-isde.canada.ca/site/spectrum-management-telecommunications/en/devices-and-equipment/interference-causing-equipment-standards-ices/ices-003-information-technology-equipment-including-digital-apparatus (ICES-003 standard page) ; https://ised-isde.canada.ca/site/spectrum-management-telecommunications/sites/default/files/attachments/2022/ICES-003-i7-2020-10EN.pdf (ICES-003 Issue 7 PDF, ss.1.1/4.1/4.2) ; https://ised-isde.canada.ca/site/spectrum-management-telecommunications/sites/default/files/documents/ices-gen_issue2.pdf (ICES-Gen Issue 2 PDF, s.3.3 SDoC/Category II) ; https://laws-lois.justice.gc.ca/eng/acts/R-2/ (Radiocommunication Act, ss.2/5) ; https://laws-lois.justice.gc.ca/eng/regulations/SOR-96-484/FullText.html (Radiocommunication Regulations, s.21(5))"
+          :required-evidence ["ICES-003-EMC-test-report (conducted + radiated emission test per CAN/CSA-CISPR 32:17 or ANSI C63.4)"
+                               "CAN-ICES-003-NMB-003-compliance-label (Class A or Class B, manufacturer self-declared per ICES-Gen s.6)"
+                               "IEC-62368-1-safety-test-report"
+                               "end-of-line-quality-chain-of-custody-record"]}})
 
 (defn spec-basis [iso3] (get catalog iso3))
 
