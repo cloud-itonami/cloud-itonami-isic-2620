@@ -34,11 +34,10 @@
   immutable log -- the audit trail a community trusting a device-
   assembly plant needs, and the evidence a manufacturer needs if a
   shipment or conformity decision is later disputed."
-  (:require #?(:clj  [clojure.edn :as edn]
-               :cljs [cljs.reader :as edn])
-            [deviceassembly.registry :as registry]
+  (:require [deviceassembly.registry :as registry]
             [deviceassembly.robotics :as robotics]
-            [langchain.db :as d]))
+            [langchain.db :as d]
+            [langchain-store.core :as ls]))
 
 (defprotocol Store
   (device-unit [s id])
@@ -258,9 +257,6 @@
    :shipment-sequence/jurisdiction    {:db/unique :db.unique/identity}
    :declaration-sequence/jurisdiction {:db/unique :db.unique/identity}})
 
-(defn- enc [v] (pr-str v))
-(defn- dec* [s] (when s (edn/read-string s)))
-
 (defn- device-unit->tx [{:keys [id device-unit-name emc-emission-deviation-actual emc-emission-deviation-min emc-emission-deviation-max
                                  thermal-margin-deviation-actual thermal-margin-deviation-min thermal-margin-deviation-max
                                  connector-plug-mass-kg sim-peak-insertion-force-n sim-peak-decel-mps2
@@ -280,7 +276,7 @@
     (some? sim-peak-decel-mps2)                   (assoc :device-unit/sim-peak-decel-mps2 sim-peak-decel-mps2)
     (some? eol-defect-unresolved?)               (assoc :device-unit/eol-defect-unresolved? eol-defect-unresolved?)
     (some? robotics-sim-verified?)                (assoc :device-unit/robotics-sim-verified? robotics-sim-verified?)
-    (some? robotics-sim-record)                   (assoc :device-unit/robotics-sim-record (enc robotics-sim-record))
+    (some? robotics-sim-record)                   (assoc :device-unit/robotics-sim-record (ls/enc robotics-sim-record))
     (some? device-unit-shipped?)                 (assoc :device-unit/device-unit-shipped? device-unit-shipped?)
     (some? declaration-issued?)                  (assoc :device-unit/declaration-issued? declaration-issued?)
     jurisdiction                                 (assoc :device-unit/jurisdiction jurisdiction)
@@ -311,7 +307,7 @@
      :sim-peak-decel-mps2 (:device-unit/sim-peak-decel-mps2 m)
      :eol-defect-unresolved? (boolean (:device-unit/eol-defect-unresolved? m))
      :robotics-sim-verified? (boolean (:device-unit/robotics-sim-verified? m))
-     :robotics-sim-record (dec* (:device-unit/robotics-sim-record m))
+     :robotics-sim-record (ls/dec* (:device-unit/robotics-sim-record m))
      :device-unit-shipped? (boolean (:device-unit/device-unit-shipped? m))
      :declaration-issued? (boolean (:device-unit/declaration-issued? m))
      :jurisdiction (:device-unit/jurisdiction m) :status (:device-unit/status m)
@@ -326,25 +322,25 @@
          (map #(pull->device-unit (d/pull (d/db conn) device-unit-pull [:device-unit/id %])))
          (sort-by :id)))
   (eol-screen-of [_ id]
-    (dec* (d/q '[:find ?p . :in $ ?aid
+    (ls/dec* (d/q '[:find ?p . :in $ ?aid
                 :where [?k :eol-screen/device-unit-id ?aid] [?k :eol-screen/payload ?p]]
               (d/db conn) id)))
   (requirements-verification-of [_ device-unit-id]
-    (dec* (d/q '[:find ?p . :in $ ?aid
+    (ls/dec* (d/q '[:find ?p . :in $ ?aid
                 :where [?a :verification/device-unit-id ?aid] [?a :verification/payload ?p]]
               (d/db conn) device-unit-id)))
   (ledger [_]
     (->> (d/q '[:find ?s ?f :where [?e :ledger/seq ?s] [?e :ledger/fact ?f]] (d/db conn))
          (sort-by first)
-         (mapv (comp dec* second))))
+         (mapv (comp ls/dec* second))))
   (shipment-history [_]
     (->> (d/q '[:find ?s ?r :where [?e :shipment/seq ?s] [?e :shipment/record ?r]] (d/db conn))
          (sort-by first)
-         (mapv (comp dec* second))))
+         (mapv (comp ls/dec* second))))
   (declaration-history [_]
     (->> (d/q '[:find ?s ?r :where [?e :declaration/seq ?s] [?e :declaration/record ?r]] (d/db conn))
          (sort-by first)
-         (mapv (comp dec* second))))
+         (mapv (comp ls/dec* second))))
   (next-shipment-sequence [_ jurisdiction]
     (or (d/q '[:find ?n . :in $ ?j
               :where [?e :shipment-sequence/jurisdiction ?j] [?e :shipment-sequence/next ?n]]
@@ -365,10 +361,10 @@
       (d/transact! conn [(device-unit->tx value)])
 
       :verification/set
-      (d/transact! conn [{:verification/device-unit-id (first path) :verification/payload (enc payload)}])
+      (d/transact! conn [{:verification/device-unit-id (first path) :verification/payload (ls/enc payload)}])
 
       :eol-screen/set
-      (d/transact! conn [{:eol-screen/device-unit-id (first path) :eol-screen/payload (enc payload)}])
+      (d/transact! conn [{:eol-screen/device-unit-id (first path) :eol-screen/payload (ls/enc payload)}])
 
       :device-unit/mark-shipped
       (let [device-unit-id (first path)
@@ -378,7 +374,7 @@
         (d/transact! conn
                      [(device-unit->tx (assoc device-unit-patch :id device-unit-id))
                       {:shipment-sequence/jurisdiction jurisdiction :shipment-sequence/next next-n}
-                      {:shipment/seq (count (shipment-history s)) :shipment/record (enc (get result "record"))}])
+                      {:shipment/seq (count (shipment-history s)) :shipment/record (ls/enc (get result "record"))}])
         result)
 
       :device-unit/mark-declared
@@ -389,12 +385,12 @@
         (d/transact! conn
                      [(device-unit->tx (assoc device-unit-patch :id device-unit-id))
                       {:declaration-sequence/jurisdiction jurisdiction :declaration-sequence/next next-n}
-                      {:declaration/seq (count (declaration-history s)) :declaration/record (enc (get result "record"))}])
+                      {:declaration/seq (count (declaration-history s)) :declaration/record (ls/enc (get result "record"))}])
         result)
       nil)
     s)
   (append-ledger! [s fact]
-    (d/transact! conn [{:ledger/seq (count (ledger s)) :ledger/fact (enc fact)}])
+    (d/transact! conn [{:ledger/seq (count (ledger s)) :ledger/fact (ls/enc fact)}])
     fact)
   (with-device-units [s device-units]
     (when (seq device-units) (d/transact! conn (mapv device-unit->tx (vals device-units)))) s))
