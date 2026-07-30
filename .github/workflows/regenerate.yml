@@ -14,6 +14,13 @@ jobs:
           path: orgs/cloud-itonami/cloud-itonami-isic-2620
       - uses: actions/checkout@v4
         with: {repository: kotoba-lang/langchain, path: orgs/kotoba-lang/langchain}
+      # deps.edn references langchain-store via :local/root (store's
+      # DatomicStore backend) -- without this checkout the clojure
+      # classpath build dies on "Local lib io.github.kotoba-lang/
+      # langchain-store not found" and the nightly console regen fails.
+      # (Verified 2026-07-30: run had been failing nightly.)
+      - uses: actions/checkout@v4
+        with: {repository: kotoba-lang/langchain-store, path: orgs/kotoba-lang/langchain-store}
       - uses: actions/checkout@v4
         with: {repository: kotoba-lang/langgraph, path: orgs/kotoba-lang/langgraph}
       - uses: actions/checkout@v4
