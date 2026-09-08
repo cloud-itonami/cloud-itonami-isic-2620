@@ -30,7 +30,7 @@
   `deviceassembly.operation`'s `:actuation/ship-device-unit`/
   `:actuation/issue-declaration-of-conformity`, always human-gated --
   see README `Actuation`)."
-  (:require [clojure.string :as str]))
+  (:require [kotoba.lang.text :as str]))
 
 (defn- unsigned-certificate
   "Every certificate this actor produces is UNSIGNED -- signature is the
@@ -76,7 +76,7 @@
     (throw (ex-info "device-unit-shipment: jurisdiction required" {})))
   (when (< sequence 0)
     (throw (ex-info "device-unit-shipment: sequence must be >= 0" {})))
-  (let [shipment-number (str (str/upper-case jurisdiction) "-SHP-" (zero-pad sequence 6))
+  (let [shipment-number (str (str/upper jurisdiction) "-SHP-" (zero-pad sequence 6))
         record {"record_id" shipment-number
                 "kind" "device-unit-shipment-draft"
                 "device_unit_id" device-unit-id
@@ -101,7 +101,7 @@
     (throw (ex-info "declaration-of-conformity: jurisdiction required" {})))
   (when (< sequence 0)
     (throw (ex-info "declaration-of-conformity: sequence must be >= 0" {})))
-  (let [evidence-number (str (str/upper-case jurisdiction) "-DOC-" (zero-pad sequence 6))
+  (let [evidence-number (str (str/upper jurisdiction) "-DOC-" (zero-pad sequence 6))
         record {"record_id" evidence-number
                 "kind" "declaration-of-conformity-draft"
                 "device_unit_id" device-unit-id
