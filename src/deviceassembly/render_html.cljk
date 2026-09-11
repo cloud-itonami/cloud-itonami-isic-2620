@@ -5,12 +5,12 @@
   Wave5 rollout template: `90-docs/business/cloud-itonami-flagship-
   generator-template.edn`). This repo previously had a HAND-AUTHORED
   `docs/samples/operator-console.html` (a generic boilerplate landing
-  page pasted from a single `clojure -M:dev:run` transcript, never
+  page pasted from a single `kbb -M:dev:run` transcript, never
   regenerated). This namespace REPLACES that with a genuine build-time
   generator that drives the REAL actor stack (`deviceassembly.operation`
   -> `deviceassembly.governor` -> `deviceassembly.store`) through a
   scenario adapted from this repo's own `deviceassembly.sim` demo driver
-  (`clojure -M:dev:run`, confirmed by running it directly -- its ids
+  (`kbb -M:dev:run`, confirmed by running it directly -- its ids
   (device-unit-1..6), ops and violation rule names all match
   `deviceassembly.store/demo-data`'s real seed data and
   `deviceassembly.governor`'s real check functions; unlike
@@ -30,7 +30,7 @@
   37.5N peak insertion force against the 30.0N ceiling,
   `deviceassembly.robotics`/ADR-2607991500) -- not a hand-typed number.
 
-  Usage: `clojure -M:dev:render-html [out-file]`
+  Usage: `kbb -M:dev:render-html [out-file]`
   (default `docs/samples/operator-console.html`)."
   (:require [jp-go-dds.skin]
             [kotoba.lang.text :as str]

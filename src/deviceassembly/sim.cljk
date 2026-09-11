@@ -1,5 +1,5 @@
 (ns deviceassembly.sim
-  "Demo driver -- `clojure -M:dev:run`. Walks a clean device-unit
+  "Demo driver -- `kbb -M:dev:run`. Walks a clean device-unit
   through intake -> compliance-rules requirements verification ->
   end-of-line-defect screening -> burn-in-cell robotics mission ->
   device-unit-shipment proposal (always escalates) -> human approval ->
