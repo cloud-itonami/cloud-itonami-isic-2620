@@ -1,5 +1,5 @@
 (ns deviceassembly.registry-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [kotoba.test :refer [deftest is]]
             [deviceassembly.registry :as r]))
 
 ;; ----------------------------- device-unit-emc-emission-out-of-range? -----------------------------
