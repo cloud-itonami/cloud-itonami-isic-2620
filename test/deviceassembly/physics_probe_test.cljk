@@ -1,0 +1,56 @@
+(ns deviceassembly.physics-probe-test
+  "The probe is the bot's only source of \"measured\"; these pin that it
+  measures (every run numeric, count = expected), that the numbers come
+  from the simulation (the derived boundary really straddles the
+  ceiling), and that a changed solver would show."
+  (:require [clojure.test :refer [deftest is testing]]
+            [deviceassembly.physics-probe :as probe]
+            [deviceassembly.robotics :as robotics]))
+
+(deftest probe-measures-every-run
+  (let [p (probe/probe)]
+    (is (= "itonami.physical-ai.probe.v1" (:physics-probe/schema p)))
+    (is (pos? (:count p)))
+    (is (= (:count p) (:expected p) (count (:runs p))))
+    (testing "every run carries a numeric force and tick count from the trajectory"
+      (doseq [r (:runs p)]
+        (is (number? (get-in r [:quantities :sim-peak-insertion-force-n])))
+        (is (pos? (get-in r [:quantities :ticks])))))))
+
+(deftest force-rises-with-plug-mass-at-the-default-rate
+  (let [forces (->> (:runs (probe/probe))
+                    (remove #(get-in % [:input :insertion-speed-mps]))
+                    (map #(get-in % [:quantities :sim-peak-insertion-force-n])))]
+    (is (= 5 (count forces)))
+    (is (apply < forces))))
+
+(deftest store-fixtures-pass-and-the-negative-control-fails
+  (let [by-mass (->> (:runs (probe/probe))
+                     (remove #(get-in % [:input :insertion-speed-mps]))
+                     (map (juxt #(get-in % [:input :plug-mass-kg]) :out-of-tolerance?))
+                     (into {}))]
+    (is (false? (get by-mass 1.2)))
+    (is (false? (get by-mass 1.3)))
+    (is (true? (get by-mass 5.0)))))
+
+(deftest force-rises-with-insertion-rate-at-fixed-mass
+  (let [by-speed (->> (:runs (probe/probe))
+                      (filter #(= 1.2 (double (get-in % [:input :plug-mass-kg]))))
+                      (map (juxt #(get-in % [:quantities :insertion-speed-mps])
+                                 #(get-in % [:quantities :sim-peak-insertion-force-n])))
+                      (sort-by first)
+                      (map second))]
+    (is (= 3 (count by-speed)))
+    (is (apply < by-speed))))
+
+(deftest derived-boundary-straddles-the-ceiling
+  (let [m (probe/max-passing-plug-mass-kg)
+        force (fn [kg] (:sim-peak-insertion-force-n
+                        (robotics/connector-mating-telemetry-for {:connector-plug-mass-kg kg})))]
+    (is (number? m))
+    (testing "at the boundary the force is within the ceiling; 1% heavier it is not"
+      (is (<= (force m) robotics/max-insertion-force-n))
+      (is (> (force (* 1.01 m)) robotics/max-insertion-force-n)))))
+
+(deftest bracket-that-does-not-straddle-answers-nil
+  (is (nil? (probe/max-passing-plug-mass-kg 0.1 1.0 10))))
