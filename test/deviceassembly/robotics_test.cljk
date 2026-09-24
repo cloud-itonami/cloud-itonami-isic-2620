@@ -9,7 +9,7 @@
   a physics check isn't invented or randomized) -- alongside the
   UNCHANGED pre-existing symbolic `thermal-margin-out-of-range?`
   check, proving this ADR is purely additive."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [deviceassembly.robotics :as robotics]))
 
 (defn- approx= [a b eps] (< (Math/abs (double (- a b))) eps))
